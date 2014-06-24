@@ -6,8 +6,6 @@
 #include "errors.h"
 #include "cola_op.h"
 
-//Comentario de prueba para git
-
 char *argumentos = "heimvrDdIbs";
 
 Cola_op cola;
