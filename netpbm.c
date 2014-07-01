@@ -20,17 +20,17 @@ void netpbm_invertir_pixel(Netpbm *img, int i, int f) {
 void netpbm_swap_pixel(Netpbm *img, int ai, int af, int bi, int bf) {
 	unsigned char *tmp = malloc(img->bpp);
 	memcpy(
-			tmp,
-			netpbm_get_pixel(img, bi, bf),
-			img->bpp);
+		tmp,
+		netpbm_get_pixel(img, bi, bf),
+		img->bpp);
 	memcpy(
-			netpbm_get_pixel(img, bi, bf),
-			netpbm_get_pixel(img, ai, af),
-			img->bpp);
+		netpbm_get_pixel(img, bi, bf),
+		netpbm_get_pixel(img, ai, af),
+		img->bpp);
 	memcpy(
-			netpbm_get_pixel(img, ai, af),
-			tmp,
-			img->bpp);
+		netpbm_get_pixel(img, ai, af),
+		tmp,
+		img->bpp);
 	free(tmp);
 }
 
@@ -179,9 +179,9 @@ void netpbm_multiplicar(Netpbm *img) {
 		for (nf = 0, f = 0; nf < new_width; nf++) {
 			if (!(nf % 2)) f++;
 			memcpy(
-					data + ni * new_width * img->bpp + nf * img->bpp,
-					netpbm_get_pixel(img, i-1, f-1),
-					img->bpp);
+				data + ni * new_width * img->bpp + nf * img->bpp,
+				netpbm_get_pixel(img, i-1, f-1),
+				img->bpp);
 		}
 	}
 
@@ -205,9 +205,9 @@ void netpbm_dividir(Netpbm *img) {
 	for (ni = 0, i = 0; ni < new_height; ni++, i += 2) {
 		for (nf = 0, f = 0; nf < new_width; nf++, f += 2) {
 			memcpy(
-					data + ni * new_width * img->bpp + nf * img->bpp,
-					netpbm_get_pixel(img, i, f),
-					img->bpp);
+				data + ni * new_width * img->bpp + nf * img->bpp,
+				netpbm_get_pixel(img, i, f),
+				img->bpp);
 		}
 	}
 
@@ -228,9 +228,9 @@ void netpbm_rotar_izquierda(Netpbm *img) {
 	for (ai = 0; ai < img->height; ai++) {
 		for (af = 0, bf = (img->width - 1); af < img->width; af++, bf--) {
 			memcpy(
-					data + bf * img->height * img->bpp + ai * img->bpp,
-					netpbm_get_pixel(img, ai, af),
-					img->bpp);
+				data + bf * img->height * img->bpp + ai * img->bpp,
+				netpbm_get_pixel(img, ai, af),
+				img->bpp);
 		}
 	}
 
@@ -252,9 +252,9 @@ void netpbm_rotar_derecha(Netpbm *img) {
 	for (ai = 0, bi = (img->height - 1); ai < img->height; ai++, bi--) {
 		for (af = 0; af < img->width; af++) {
 			memcpy(
-					data + af * img->height * img->bpp + bi * img->bpp,
-					netpbm_get_pixel(img, ai, af),
-					img->bpp);
+				data + af * img->height * img->bpp + bi * img->bpp,
+				netpbm_get_pixel(img, ai, af),
+				img->bpp);
 		}
 	}
 
@@ -286,10 +286,8 @@ void netpbm_desenfocar(Netpbm *img) {
 					}
 				}
 			}
-			if(cant){
-				for (c = 0; c < img->bpp; c++) {
-					px[c] = sum[c] / cant;
-				}
+			for (c = 0; c < img->bpp; c++) {
+				px[c] = sum[c] / cant;
 			}
 		}
 	}

@@ -5,14 +5,16 @@
 
 typedef void (*Operacion)(Netpbm*);
 
-typedef struct foo {
+typedef struct Nodo_op_tmp Nodo_op;
+
+struct Nodo_op_tmp {
     Operacion op;
-    struct foo *sig;
-} Nodo_op;
+    Nodo_op *sig;
+};
 
 typedef struct{
     Nodo_op *pri;
-    Nodo_op *ult;
+    Nodo_op *ult; // Almaceno el ult para mantener T(n) = cte.
     int cant;
 } Cola_op;
 

@@ -8,6 +8,22 @@
 
 char *argumentos = "heimvrDdIbs";
 
+void usage() {
+	printf("\n"
+		" -h           muestra una ayuda con todas estas opciones.\n"
+		" -e <archivo> carga el archivo con la imagen a procesar.\n"
+		" -s <archivo> nombre del archivo de salida.\n"
+		" \n"         
+		" -i           mostrar información de la imágen.\n"
+		" -m           voltear horizontalmente.\n"
+		" -v           voltear verticalmente.\n"
+		" -r (i|d)     rotar a izquierda o derecha respectivamente.\n"
+		" -D           duplica el tamaño.\n"
+		" -d           divide a la mitad el tamaño.\n"
+		" -I           inviertir colores.\n"
+		" -b           desenfocar");
+}
+
 Cola_op cola;
 Netpbm img;
 
@@ -16,26 +32,10 @@ void onclose() {
 	cola_destroy(&cola);
 }
 
-void usage() {
-	printf("\n"
-			"      -h            muestra una ayuda con todas estas opciones.\n"
-			"      -e <archivo>  carga el archivo con la imagen a procesar.\n"
-			"      -s <archivo>  nombre del archivo de salida.\n"
-			"      \n"
-			"      -i            mostrar información de la imágen.\n"
-			"      -m            voltear horizontalmente.\n"
-			"      -v            voltear verticalmente.\n"
-			"      -r (i|d)      rotar a izquierda o derecha respectivamente.\n"
-			"      -D            duplica el tamaño.\n"
-			"      -d            divide a la mitad el tamaño.\n"
-			"      -I            inviertir colores.\n"
-			"      -b            desenfocar");
-}
-
 int is_arg(char *cmp_arg) {
 	return ( (strlen(cmp_arg) == 2)
-			&& (cmp_arg[0] == '-')
-			&& (index(argumentos, cmp_arg[1]) != NULL));
+		&& (cmp_arg[0] == '-')
+		&& (index(argumentos, cmp_arg[1]) != NULL));
 }
 
 int main(int argc, char *argv[]) {
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 		showInfo = 0,
 		optind = 1;
 
-	FILE *fp = NULL;
+	FILE *pFileOut = NULL;
 
 	char *fileIn = NULL,
 		*fileOut = NULL;
@@ -142,14 +142,15 @@ int main(int argc, char *argv[]) {
 	}
 	
 	/* Si no hay operaciones */
-	if(cola_vacia(cola)){
+	if (cola_vacia(cola)) {
 		netpbm_exit(EXIT_SUCCESS);
 	}
 
 	/* Antes de aplicar las operaciones verifico si se puede crear 
 	 * el archivo de salida */
-	fp = fopen(fileOut, "wb+");
-	if (!fp) {
+	pFileOut = fopen(fileOut, "wb+");
+	
+	if (!pFileOut) {
 		netpbm_exit(ERR_OUT);
 	}
 	
@@ -160,8 +161,8 @@ int main(int argc, char *argv[]) {
 		fn(&img);
 	}
 	
-	/* Guardo el resultado y si no puedo (No hay espacio) cierro el programa */
-	if (!netpbm_dump_file(&img, fp)) {
+	/* Guardo el resultado y si no puedo (No hay espacio) cierro el prog. */
+	if (!netpbm_dump_file(&img, pFileOut)) {
 		remove(fileOut);
 		netpbm_exit(ERR_OUT);
 	}

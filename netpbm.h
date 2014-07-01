@@ -12,8 +12,6 @@ typedef struct {
     unsigned char *data;
 } Netpbm;
 
-unsigned char *netpbm_get_pixel(Netpbm *img, int i, int f);
-
 /* Inicializa la estructura */
 void netpbm_create(Netpbm *img);
 
