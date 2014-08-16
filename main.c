@@ -4,53 +4,68 @@
 
 #include "netpbm.h"
 #include "errors.h"
-#include "cola_op.h"
+#include "cola_gen.h"
 
-char *argumentos = "heimvrDdIbs";
+int cant_args = 15;
+char *argumentos[] = { "h", "e", "i", "m", "v", "r", "D", "d", "I", "b", "s",
+	"masc", "hist", "kern", "rdeg" };
+	
+int is_arg(char *cmp_arg) {
+	int i;
+	for( i = 0; i < cant_args ; i++ ){
+		if( (strlen(cmp_arg) > 2) && (cmp_arg[0] == '-') 
+			&& ( strcmp(argumentos[i], cmp_arg[1]) == 0 ) ){
+			return 1;
+		}
+	}
+	return 0;
+}
 
 void usage() {
 	printf("\n"
-		" -h           muestra una ayuda con todas estas opciones.\n"
-		" -e <archivo> carga el archivo con la imagen a procesar.\n"
-		" -s <archivo> nombre del archivo de salida.\n"
-		" \n"         
-		" -i           mostrar información de la imágen.\n"
-		" -m           voltear horizontalmente.\n"
-		" -v           voltear verticalmente.\n"
-		" -r (i|d)     rotar a izquierda o derecha respectivamente.\n"
-		" -D           duplica el tamaño.\n"
-		" -d           divide a la mitad el tamaño.\n"
-		" -I           inviertir colores.\n"
-		" -b           desenfocar");
+		" -h            muestra una ayuda con todas estas opciones.\n"
+		" -e <archivo>  nombre del archivo de entrada.\n"
+		" -s <archivo>  nombre del archivo de salida.\n"
+		" \n"
+		" -i            mostrar información de la imágen.\n"
+		" -m            voltear horizontalmente.\n"
+		" -v            voltear verticalmente.\n"
+		" -r (i|d)      rotar a izquierda o derecha respectivamente.\n"
+		" -D            duplica el tamaño.\n"
+		" -d            divide a la mitad el tamaño.\n"
+		" -I            inviertir colores.\n"
+		" -b            desenfocar"
+		" \n"
+		" -masc <mascara> <superpuesta>    aplica la mascara."
+		" -hist (r|g|b)?                   genera histograma a <salida>"
+		" -kern n,n,n,n,n,n,n,n,n          produce convulsion 3x3",
+		" -rdeg <angulo>                   rota la imágen en grados");
 }
 
-Cola_op cola;
-Netpbm img;
-
-void onclose() {
-	netpbm_destroy(&img);
-	cola_destroy(&cola);
-}
-
-int is_arg(char *cmp_arg) {
-	return ( (strlen(cmp_arg) == 2)
-		&& (cmp_arg[0] == '-')
-		&& (index(argumentos, cmp_arg[1]) != NULL));
+Cola_gen 	cola_fn,
+		cola_args;
+		
+void onclose(){
+	cola_destroy(&cola_fn);
+	cola_destroy(&cola_args);
+	puts("Bye.");
 }
 
 int main(int argc, char *argv[]) {
-	cola_create(&cola);
-	netpbm_create(&img);
-
+	cola_create(&cola_fn);
+	cola_create(&cola_args);
+	
 	atexit(onclose);
-
-	int showHelp = 0,
+	
+	netpbm_create(&img);
+	
+	int 	showHelp = 0,
 		showInfo = 0,
 		optind = 1;
 
-	FILE *pFileOut = NULL;
+	FILE 	*pFileOut = NULL;
 
-	char *fileIn = NULL,
+	char 	*fileIn = NULL,
 		*fileOut = NULL;
 
 	for (; optind < argc; optind++) {
@@ -71,35 +86,35 @@ int main(int argc, char *argv[]) {
 			showInfo = 1;
 
 		} else if (strcmp(argv[ optind ], "-m") == 0) {
-			cola_encolar(&cola, netpbm_voltear_horizontal);
+			cola_encolar(&cola_fn, netpbm_volt_h, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-v") == 0) {
-			cola_encolar(&cola, netpbm_voltear_vertical);
+			cola_encolar(&cola_fn, netpbm_volt_v, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-D") == 0) {
-			cola_encolar(&cola, netpbm_multiplicar);
+			cola_encolar(&cola_fn, netpbm_mult, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-d") == 0) {
-			cola_encolar(&cola, netpbm_dividir);
+			cola_encolar(&cola_fn, netpbm_div, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-r") == 0) {
 			if ((optind + 1) >= argc || is_arg(argv[optind + 1])) {
 				netpbm_exit(SUB_REQ, argv[optind]);
 			} else if (*argv[optind + 1] == 'i') {
 				optind++;
-				cola_encolar(&cola, netpbm_rotar_izquierda);
+				cola_encolar(&cola_fn, netpbm_rot_i, Operacion);
 			} else if (*argv[optind + 1] == 'd') {
 				optind++;
-				cola_encolar(&cola, netpbm_rotar_derecha);
+				cola_encolar(&cola_fn, netpbm_rot_d, Operacion);
 			} else {
 				netpbm_exit(SUB_INV, argv[optind]);
 			}
 		} else if (strcmp(argv[ optind ], "-I") == 0) {
-			cola_encolar(&cola, netpbm_invertir);
+			cola_encolar(&cola_fn, netpbm_inv, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-b") == 0) {
-			cola_encolar(&cola, netpbm_desenfocar);
-
+			cola_encolar(&cola_fn, netpbm_blur, Operacion);
+			
 		} else if (strcmp(argv[ optind ], "-s") == 0) {
 			if (fileOut) {
 				netpbm_exit(ARG_REP, argv[optind]);
@@ -109,6 +124,20 @@ int main(int argc, char *argv[]) {
 				optind++;
 				fileOut = argv[optind];
 			}
+
+		} else if (strcmp(argv[ optind ], "-masc") == 0) {
+			cola_encolar(&cola_fn, netpbm_masc, Operacion);
+			//cola_encolar(&cola_args, "asd", char *);
+			
+		} else if (strcmp(argv[ optind ], "-hist") == 0) {
+			cola_encolar(&cola_fn, netpbm_hist, Operacion);
+			
+		} else if (strcmp(argv[ optind ], "-kern") == 0) {
+			cola_encolar(&cola_fn, netpbm_kern, Operacion);
+			
+		} else if (strcmp(argv[ optind ], "-rdeg") == 0) {
+			cola_encolar(&cola_fn, netpbm_rdeg, Operacion);
+			
 		} else {
 			netpbm_exit(ARG_INV, argv[optind]);
 		}
@@ -126,7 +155,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	/* Si hay alguna operación es necesario un archivo de salida */
-	if (!cola_vacia(cola) && !fileOut) {
+	if (!cola_vacia(cola_fn) && !fileOut) {
 		netpbm_exit(ARG_REQ, "-s");
 	}
 
@@ -142,7 +171,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	/* Si no hay operaciones */
-	if (cola_vacia(cola)) {
+	if (cola_vacia(cola_fn)) {
 		netpbm_exit(EXIT_SUCCESS);
 	}
 
@@ -156,9 +185,9 @@ int main(int argc, char *argv[]) {
 	
 	/* Aplico los cambios encolados */
 	Operacion fn;
-	while (!cola_vacia(cola)) {
-		fn = cola_desencolar(&cola);
-		fn(&img);
+	while (!cola_vacia(cola_fn)) {
+		cola_desencolar(&cola_fn, &fn, Operacion);
+		fn(&img, &cola_args);
 	}
 	
 	/* Guardo el resultado y si no puedo (No hay espacio) cierro el prog. */

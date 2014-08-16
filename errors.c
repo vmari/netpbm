@@ -15,7 +15,10 @@ char *errores[] = {
 	"El tipo o tamaño de la imágen %s no es compatible con la operación %s.",
 	"Sub-argumento %s no válido.",
 	"No hay memoria para alocar.",
-	"El argumento -e debe estar primero"
+	"El argumento -e debe estar primero",
+	"El argumento %s requiere dos sub-argumentos.",
+	"La mascara y la superpuesta deben ser de igual tamaño.",
+	"Formato de mascara no válido o no soportado."
 };
 
 void netpbm_exit(int err, ...) {

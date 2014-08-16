@@ -12,6 +12,9 @@
 #define SUB_INV 9
 #define NO_MEM 10
 #define ARG_PRI 11
+#define SUBS_REQ 12
+#define MASC_SIZE 13
+#define MASC_ERR 14
 
 void netpbm_exit(int err, ...);
 
