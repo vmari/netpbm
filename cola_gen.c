@@ -13,8 +13,7 @@ int cola_vacia(Cola_gen cola) {
 }
 
 void _cola_encolar(Cola_gen *cola, void *dato, int size){
-	Nodo_gen *tmp;
-	tmp = malloc(sizeof(Nodo_gen));
+	Nodo_gen *tmp = malloc(sizeof(Nodo_gen));
 	tmp->dato = malloc(size);
 	memcpy(tmp->dato, dato, size);
 	tmp->sig = NULL;
@@ -31,6 +30,7 @@ void _cola_desencolar(Cola_gen *cola, void *dest, int size) {
 	if (cola->ult == cola->pri) {
 		cola->ult = NULL;
 	}
+	
 	memcpy(dest, cola->pri->dato, size);
 	free(cola->pri->dato);
 	Nodo_gen *tmp = cola->pri->sig;
@@ -39,13 +39,11 @@ void _cola_desencolar(Cola_gen *cola, void *dest, int size) {
 }
 
 void cola_destroy(Cola_gen *cola) {
-	Nodo_gen *tmp = cola->pri;
-	Nodo_gen *sig = cola->pri->sig;
-	while (tmp){
-		free(tmp->dato);
-		free(tmp);
-		tmp = sig;
-		sig = sig->sig;
+	Nodo_gen *tmp;
+	while(cola->pri){
+		tmp = cola->pri->sig;
+		free(cola->pri);
+		cola->pri = tmp;
 	}
 	cola->pri = NULL;
 	cola->ult = NULL;

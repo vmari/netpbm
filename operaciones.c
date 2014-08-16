@@ -6,6 +6,8 @@
 
 #include "netpbm.h"
 #include "errors.h"
+#include "cola_gen.h"
+#include "operaciones.h"
 
 // ETAPA 1
 
@@ -170,7 +172,7 @@ void netpbm_blur(Netpbm *img, Cola_gen *args) {
 // ETAPA 3 - ADICIONALES - TESTEOS
 
 void netpbm_masc(Netpbm *img , Cola_gen *args){
-	extern Netpbm masc;
+	/*extern Netpbm masc;
 	extern Netpbm super;
 	
 	if( strcmp(masc.magic,"P5") != 0 ){
@@ -196,11 +198,153 @@ void netpbm_masc(Netpbm *img , Cola_gen *args){
 				orig_px[k] = orig_px[k] * (1 - masc_v) + super_px[k] * masc_v;
 			}
 		}
-	}
+	}*/
 }
 
-void netpbm_rdeg(Netpbm *img , Cola_gen *args){}
+void netpbm_rdeg(Netpbm *img , Cola_gen *args){
+	/*if( degrees == 90 ){
+		netpbm_rotar_derecha(img);
+	}else if( degrees == -90 ){
+		netpbm_rotar_izquierda(img);
+	}else if( degrees >= 180 || degrees <= -180 ){
+		netpbm_exit(SUB_INV, "asd");
+	}else{
+		float rad = degtorad(degrees);
+		
+		unsigned char *data = NULL;
+		
+		int new_width  = abs(cos(rad)*img->width+cos((M_PI/2)-rad)*img->height),
+			new_height = abs(cos(rad)*img->height+cos((M_PI/2)-rad)*img->width);
+			
+		long size = new_width * new_height * img->bpp;
+		data = malloc(size);
+		if (!data) netpbm_exit(NO_MEM);
+		
+		int i, f, newi, newf;
+		for (i = 0; i < img->height; i++) {
+			for (f = 0; f < img->width; f++) {
+				newi = sin((M_PI/2)-rad)*i+cos((M_PI/2)-rad)*f;
+				newf = cos(rad)*f 
+					- cos((M_PI/2)-rad)*i 
+					+ cos((M_PI/2)-rad)*img->height;
+				memcpy(
+					data + newi * new_width * img->bpp + newf * img->bpp,
+					netpbm_get_pixel(img,i,f),
+					img->bpp);
+			}
+		}
+		
+		free(img->data);
+		img->data = data;
+		
+		img->width = new_width;
+		img->height = new_height;
+	}*/
+}
 
-void netpbm_kern(Netpbm *img , Cola_gen *args){}
+void netpbm_kern(Netpbm *img , Cola_gen *args){
+	/*unsigned char *data = NULL;
+	
+	int kernel[9];
+	int div;
+	
+	if( sscanf(k,"%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", 
+			&kernel[0], &kernel[1],	&kernel[2],
+			&kernel[3], &kernel[4], &kernel[5],
+			&kernel[6], &kernel[7],	&kernel[8], &div) != 10 )
+			
+			netpbm_exit(SUB_INV, "-k");
+	
+	size_t size = img->width * img->height * img->bpp;
+	data = malloc(size);
+	if (!data) netpbm_exit(NO_MEM);
 
-void netpbm_hist(Netpbm *img , Cola_gen *args){}
+	int i, f;
+	int sum[img->bpp];
+	int a, b, c, cant;
+	for (i = 0; i < img->height; i++) {
+		for (f = 0; f < img->width; f++) {
+			unsigned char *px = data + i * img->width * img->bpp + f * img->bpp;
+			cant = 0;
+			for (c = 0; c < img->bpp; c++) sum[c] = 0;
+			for (a = ((i)?-1:0); a <= ((img->height-i-1)?1:0); a++) {
+				for (b = ((f)?-1:0); b <= ((img->width-f-1)?1:0); b++) {
+					cant++;
+					for (c = 0; c < img->bpp; c++) {
+						sum[c] += (*(netpbm_get_pixel(img, i + a, f + b) + c)) *
+									(*(kernel + 1*3 + 1 + a*3 + b ));
+					}
+				}
+			}
+			for (c = 0; c < img->bpp; c++) {
+				sum[c] /= ((div)?cant:1);
+				if(sum[c] > 255)
+					px[c] = 255;
+				else if(sum[c] < 0)
+					px[c] = 0;
+				else
+					px[c] = sum[c];
+			}
+		}
+	}
+	free(img->data);
+	img->data = data;*/
+}
+
+void netpbm_hist(Netpbm *img , Cola_gen *args){
+	/*int ancho = img->maxval + 1;
+	long int histogram[img->bpp][ancho];
+	
+	int i,f,k;
+	for( i = 0 ; i < img->bpp ; i++ ){
+		for( f = 0 ; f < ancho ; f++ ){
+			histogram[i][f] = 0;
+		}
+	}
+	
+	long int pos,max = 0;
+	
+	for( i = 0 ; i < img->height ; i++ ){
+		for( f = 0 ; f < img->width ; f++ ){
+			for( k = 0 ; k < img->bpp ; k++ ){
+				pos = *(netpbm_get_pixel(img,i,f) + ((img->bpp > 1)?k:0));
+				histogram[k][pos]++;
+				if( histogram[k][pos] > max ){
+					max = histogram[k][pos];
+				}
+			}
+		}
+	}
+	
+	Netpbm hist;
+	strcpy(hist.magic,"P6");
+	hist.width = ancho;
+	hist.maxval = 255;
+	hist.height = HISTOGRAM_HEIGHT;
+	hist.bpp = 3;
+	
+	long int tam = hist.width * hist.height * hist.bpp; 
+	
+	hist.data = malloc( tam );
+	
+	
+	for( i = 0 ; i < tam ; i++){
+		hist.data[i] = 0x2D;
+	}
+	
+	float alto;
+	float factor = (float) HISTOGRAM_HEIGHT / (float) max;
+	
+	for( i = 0 ; i < hist.width ; i++ ){
+		for( f = 0 ; f < img->bpp ; f++ ){
+			alto = (float) histogram[f][i] * factor;
+			for( k = (int) alto ; k >= 0 ; k-- ){
+				*(netpbm_get_pixel(&hist,( hist.height - 1 - k ) ,i)+f) = 0xFF;
+			}
+		}
+	}
+
+	//netpbm_dump_file(&hist, pFileOut);
+	
+	netpbm_destroy(&hist);*/
+}

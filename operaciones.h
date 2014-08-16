@@ -1,8 +1,10 @@
 #ifndef OPERACIONES_H
 #define OPERACIONES_H
 
-#include "netpbm.c"
-#include "cola_gen.c"
+#include "netpbm.h"
+#include "cola_gen.h"
+
+#define HISTOGRAM_HEIGHT 120
 
 typedef void (*Operacion)(Netpbm *img, Cola_gen *args);
 

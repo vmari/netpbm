@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "netpbm.h"
+#include "operaciones.h"
 #include "errors.h"
 #include "cola_gen.h"
 
@@ -14,7 +15,7 @@ int is_arg(char *cmp_arg) {
 	int i;
 	for( i = 0; i < cant_args ; i++ ){
 		if( (strlen(cmp_arg) > 2) && (cmp_arg[0] == '-') 
-			&& ( strcmp(argumentos[i], cmp_arg[1]) == 0 ) ){
+			&& ( strcmp(argumentos[i], (cmp_arg + 1) ) == 0 ) ){
 			return 1;
 		}
 	}
@@ -38,12 +39,13 @@ void usage() {
 		" \n"
 		" -masc <mascara> <superpuesta>    aplica la mascara."
 		" -hist (r|g|b)?                   genera histograma a <salida>"
-		" -kern n,n,n,n,n,n,n,n,n          produce convulsion 3x3",
+		" -kern n,n,n,n,n,n,n,n,n,p        produce convulsion 3x3"
 		" -rdeg <angulo>                   rota la imágen en grados");
 }
 
 Cola_gen 	cola_fn,
 		cola_args;
+Netpbm		img;
 		
 void onclose(){
 	cola_destroy(&cola_fn);
@@ -52,6 +54,7 @@ void onclose(){
 }
 
 int main(int argc, char *argv[]) {
+
 	cola_create(&cola_fn);
 	cola_create(&cola_args);
 	

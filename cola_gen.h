@@ -4,7 +4,7 @@
 typedef struct Nodo_gen_tmp Nodo_gen;
 
 struct Nodo_gen_tmp {
-    void *dato;
+    char *dato;
     Nodo_gen *sig;
 };
 
@@ -27,7 +27,7 @@ void _cola_encolar(Cola_gen *cola, void *dato, int size);
 
 /* Desencola una operacion de 'cola' --No verifica si esta vacia-- */
 void _cola_desencolar(Cola_gen *cola, void *dest, int size);
-#define cola_desencolar(cola,dato,tipo) _cola_desencolar(cola,dato,sizeof(tipo))
+#define cola_desencolar(cola,dest,tipo) _cola_desencolar(cola,dest,sizeof(tipo))
 
 /* Libera una cola */
 void cola_destroy(Cola_gen *cola);
