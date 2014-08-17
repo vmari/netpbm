@@ -18,7 +18,8 @@ char *errores[] = {
 	"El argumento -e debe estar primero",
 	"El argumento %s requiere dos sub-argumentos.",
 	"La mascara y la superpuesta deben ser de igual tamaño.",
-	"Formato de mascara no válido o no soportado."
+	"Formato de mascara no válido o no soportado.",
+	"%s"
 };
 
 void netpbm_exit(int err, ...) {

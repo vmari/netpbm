@@ -16,6 +16,9 @@ typedef struct {
 /* Inicializa la estructura */
 void netpbm_create(Netpbm *img);
 
+/* Copia una imagen ya creada a otra creada o no */
+void netpbm_copy(Netpbm *dest, Netpbm *src);
+
 /* Carga en el arreglo de la estructura toda la información 
  * en fileIn si es un archivo compatible.
  * devuelve cero si no se puede */

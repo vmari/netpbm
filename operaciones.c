@@ -3,11 +3,47 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <regex.h>
 
 #include "netpbm.h"
 #include "errors.h"
 #include "cola_gen.h"
 #include "operaciones.h"
+
+
+// FUNCIONES PRIVADAS
+
+unsigned char *netpbm_get_pixel(Netpbm *img, int i, int f) {
+	return img->data + i * img->width * img->bpp + f * img->bpp;
+}
+
+void netpbm_invertir_pixel(Netpbm *img, int i, int f) {
+	unsigned char *px = netpbm_get_pixel(img, i, f);
+	int k;
+	for (k = 0; k < img->bpp; k++) px[k] = img->maxval - px[k];
+}
+
+void netpbm_swap_pixel(Netpbm *img, int ai, int af, int bi, int bf) {
+	unsigned char *tmp = malloc(img->bpp);
+	memcpy(
+		tmp,
+		netpbm_get_pixel(img, bi, bf),
+		img->bpp);
+	memcpy(
+		netpbm_get_pixel(img, bi, bf),
+		netpbm_get_pixel(img, ai, af),
+		img->bpp);
+	memcpy(
+		netpbm_get_pixel(img, ai, af),
+		tmp,
+		img->bpp);
+	free(tmp);
+}
+
+float degtorad(float rad) {
+    return rad*(180.0/M_PI);
+}
+
 
 // ETAPA 1
 
@@ -172,8 +208,22 @@ void netpbm_blur(Netpbm *img, Cola_gen *args) {
 // ETAPA 3 - ADICIONALES - TESTEOS
 
 void netpbm_masc(Netpbm *img , Cola_gen *args){
-	/*extern Netpbm masc;
-	extern Netpbm super;
+	char *fmasc;
+	char *fsuper;
+	
+	cola_desencolar(args, &fmasc, char*);
+	cola_desencolar(args, &fsuper, char*);	
+	
+	Netpbm masc;
+	Netpbm super;
+	
+	if( !netpbm_set_file(&masc, fmasc) ){
+		netpbm_exit(SUB_INV,fmasc);
+	}
+	
+	if( !netpbm_set_file(&super, fsuper) ){
+		netpbm_exit(SUB_INV,fsuper);
+	}
 	
 	if( strcmp(masc.magic,"P5") != 0 ){
 		netpbm_exit(MASC_ERR);
@@ -198,16 +248,17 @@ void netpbm_masc(Netpbm *img , Cola_gen *args){
 				orig_px[k] = orig_px[k] * (1 - masc_v) + super_px[k] * masc_v;
 			}
 		}
-	}*/
+	}
 }
 
 void netpbm_rdeg(Netpbm *img , Cola_gen *args){
-	/*if( degrees == 90 ){
-		netpbm_rotar_derecha(img);
+	int degrees;
+	cola_desencolar(args, &degrees, int);
+	
+	if( degrees == 90 ){
+		netpbm_rot_d(img,args);
 	}else if( degrees == -90 ){
-		netpbm_rotar_izquierda(img);
-	}else if( degrees >= 180 || degrees <= -180 ){
-		netpbm_exit(SUB_INV, "asd");
+		netpbm_rot_i(img,args);
 	}else{
 		float rad = degtorad(degrees);
 		
@@ -239,11 +290,15 @@ void netpbm_rdeg(Netpbm *img , Cola_gen *args){
 		
 		img->width = new_width;
 		img->height = new_height;
-	}*/
+	}
 }
 
 void netpbm_kern(Netpbm *img , Cola_gen *args){
-	/*unsigned char *data = NULL;
+	char *k;
+	
+	cola_desencolar(args, &k, char*);
+	
+	unsigned char *data = NULL;
 	
 	int kernel[9];
 	int div;
@@ -253,7 +308,7 @@ void netpbm_kern(Netpbm *img , Cola_gen *args){
 			&kernel[3], &kernel[4], &kernel[5],
 			&kernel[6], &kernel[7],	&kernel[8], &div) != 10 )
 			
-			netpbm_exit(SUB_INV, "-k");
+			netpbm_exit(SUB_INV, k);
 	
 	size_t size = img->width * img->height * img->bpp;
 	data = malloc(size);
@@ -288,11 +343,29 @@ void netpbm_kern(Netpbm *img , Cola_gen *args){
 		}
 	}
 	free(img->data);
-	img->data = data;*/
+	img->data = data;
 }
 
 void netpbm_hist(Netpbm *img , Cola_gen *args){
-	/*int ancho = img->maxval + 1;
+	char *canal;
+	cola_desencolar(args, &canal, char*);
+	
+	regex_t regex;
+	int ret = regcomp(&regex, "^[rgb]{1,3}$", REG_EXTENDED | REG_NEWLINE);
+	if(ret) netpbm_exit(CUSTOM,"No se pudo compilar la expresión regular");
+	
+	ret = regexec(&regex, canal, 0, NULL, 0);
+	if (ret || ret == REG_NOMATCH){
+		netpbm_exit(SUB_INV,canal);
+	}
+	regfree(&regex);
+	
+	unsigned char mask = 0;	
+	if( index(canal,'r') ) mask |= R_COLOR;
+	if( index(canal,'g') ) mask |= G_COLOR;
+	if( index(canal,'b') ) mask |= B_COLOR;
+
+	int ancho = img->maxval + 1;
 	long int histogram[img->bpp][ancho];
 	
 	int i,f,k;
@@ -317,11 +390,16 @@ void netpbm_hist(Netpbm *img , Cola_gen *args){
 	}
 	
 	Netpbm hist;
-	strcpy(hist.magic,"P6");
+	if( strcmp(img->magic, "P5") == 0 ){
+		strcpy(hist.magic,"P5");
+		hist.bpp = 1;
+	}else{
+		strcpy(hist.magic,"P6");
+		hist.bpp = 3;
+	}
 	hist.width = ancho;
 	hist.maxval = 255;
 	hist.height = HISTOGRAM_HEIGHT;
-	hist.bpp = 3;
 	
 	long int tam = hist.width * hist.height * hist.bpp; 
 	
@@ -337,14 +415,16 @@ void netpbm_hist(Netpbm *img , Cola_gen *args){
 	
 	for( i = 0 ; i < hist.width ; i++ ){
 		for( f = 0 ; f < img->bpp ; f++ ){
-			alto = (float) histogram[f][i] * factor;
-			for( k = (int) alto ; k >= 0 ; k-- ){
-				*(netpbm_get_pixel(&hist,( hist.height - 1 - k ) ,i)+f) = 0xFF;
+			if( (1 << f) & mask || hist.bpp == 1 ){
+				alto = (float) histogram[f][i] * factor;
+				for( k = (int) alto ; k >= 0 ; k-- ){
+					*(netpbm_get_pixel(&hist,( hist.height - 1 - k ) ,i)+f) = 0xFF;
+				}
 			}
 		}
 	}
 
-	//netpbm_dump_file(&hist, pFileOut);
+	netpbm_copy(img, &hist);
 	
-	netpbm_destroy(&hist);*/
+	netpbm_destroy(&hist);
 }

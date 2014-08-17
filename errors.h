@@ -15,6 +15,7 @@
 #define SUBS_REQ 12
 #define MASC_SIZE 13
 #define MASC_ERR 14
+#define CUSTOM 15
 
 void netpbm_exit(int err, ...);
 

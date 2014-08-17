@@ -14,7 +14,7 @@ char *argumentos[] = { "h", "e", "i", "m", "v", "r", "D", "d", "I", "b", "s",
 int is_arg(char *cmp_arg) {
 	int i;
 	for( i = 0; i < cant_args ; i++ ){
-		if( (strlen(cmp_arg) > 2) && (cmp_arg[0] == '-') 
+		if( (strlen(cmp_arg) >= 2) && (cmp_arg[0] == '-') 
 			&& ( strcmp(argumentos[i], (cmp_arg + 1) ) == 0 ) ){
 			return 1;
 		}
@@ -38,7 +38,7 @@ void usage() {
 		" -b            desenfocar"
 		" \n"
 		" -masc <mascara> <superpuesta>    aplica la mascara."
-		" -hist (r|g|b)?                   genera histograma a <salida>"
+		" -hist rgb                        genera histograma a <salida>"
 		" -kern n,n,n,n,n,n,n,n,n,p        produce convulsion 3x3"
 		" -rdeg <angulo>                   rota la imágen en grados");
 }
@@ -50,11 +50,12 @@ Netpbm		img;
 void onclose(){
 	cola_destroy(&cola_fn);
 	cola_destroy(&cola_args);
-	puts("Bye.");
 }
 
 int main(int argc, char *argv[]) {
-
+	Operacion fn;
+	int i;
+	
 	cola_create(&cola_fn);
 	cola_create(&cola_args);
 	
@@ -89,34 +90,42 @@ int main(int argc, char *argv[]) {
 			showInfo = 1;
 
 		} else if (strcmp(argv[ optind ], "-m") == 0) {
-			cola_encolar(&cola_fn, netpbm_volt_h, Operacion);
+			fn = netpbm_volt_h;
+			cola_encolar(&cola_fn, &fn, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-v") == 0) {
-			cola_encolar(&cola_fn, netpbm_volt_v, Operacion);
+			fn = netpbm_volt_v;
+			cola_encolar(&cola_fn, &fn, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-D") == 0) {
-			cola_encolar(&cola_fn, netpbm_mult, Operacion);
+			fn = netpbm_mult;
+			cola_encolar(&cola_fn, &fn, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-d") == 0) {
-			cola_encolar(&cola_fn, netpbm_div, Operacion);
+			fn = netpbm_div;
+			cola_encolar(&cola_fn, &fn, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-r") == 0) {
 			if ((optind + 1) >= argc || is_arg(argv[optind + 1])) {
 				netpbm_exit(SUB_REQ, argv[optind]);
 			} else if (*argv[optind + 1] == 'i') {
 				optind++;
-				cola_encolar(&cola_fn, netpbm_rot_i, Operacion);
+				fn = netpbm_rot_i;
+				cola_encolar(&cola_fn, &fn, Operacion);
 			} else if (*argv[optind + 1] == 'd') {
 				optind++;
-				cola_encolar(&cola_fn, netpbm_rot_d, Operacion);
+				fn = netpbm_rot_d;
+				cola_encolar(&cola_fn, &fn, Operacion);
 			} else {
 				netpbm_exit(SUB_INV, argv[optind]);
 			}
 		} else if (strcmp(argv[ optind ], "-I") == 0) {
-			cola_encolar(&cola_fn, netpbm_inv, Operacion);
+			fn = netpbm_inv;
+			cola_encolar(&cola_fn, &fn, Operacion);
 
 		} else if (strcmp(argv[ optind ], "-b") == 0) {
-			cola_encolar(&cola_fn, netpbm_blur, Operacion);
+			fn = netpbm_blur;
+			cola_encolar(&cola_fn, &fn, Operacion);
 			
 		} else if (strcmp(argv[ optind ], "-s") == 0) {
 			if (fileOut) {
@@ -129,17 +138,47 @@ int main(int argc, char *argv[]) {
 			}
 
 		} else if (strcmp(argv[ optind ], "-masc") == 0) {
-			cola_encolar(&cola_fn, netpbm_masc, Operacion);
-			//cola_encolar(&cola_args, "asd", char *);
+			if ((optind + 2) >= argc || is_arg(argv[optind + 1])
+				|| is_arg(argv[optind + 2])) {
+				netpbm_exit(SUBS_REQ, argv[optind]);
+				
+			} else {
+				fn = netpbm_masc;
+				cola_encolar(&cola_fn, &fn, Operacion);
+				cola_encolar(&cola_args, &argv[++optind], char*);
+				cola_encolar(&cola_args, &argv[++optind], char*);	
+			}
 			
 		} else if (strcmp(argv[ optind ], "-hist") == 0) {
-			cola_encolar(&cola_fn, netpbm_hist, Operacion);
+			if ((optind + 1) >= argc || is_arg(argv[optind + 1])) {
+				netpbm_exit(SUB_REQ, argv[optind]);
+			}else{
+				fn = netpbm_hist;
+				cola_encolar(&cola_fn, &fn, Operacion);
+				cola_encolar(&cola_args, &argv[++optind], char*); //TODO: Canalizar
+			}
 			
 		} else if (strcmp(argv[ optind ], "-kern") == 0) {
-			cola_encolar(&cola_fn, netpbm_kern, Operacion);
+			if ((optind + 1) >= argc || is_arg(argv[optind + 1])) {
+				netpbm_exit(SUB_REQ, argv[optind]);
+				
+			}else{
+				fn = netpbm_kern;
+				cola_encolar(&cola_fn, &fn, Operacion);
+				cola_encolar(&cola_args, &argv[++optind], char*);
+			}
 			
 		} else if (strcmp(argv[ optind ], "-rdeg") == 0) {
-			cola_encolar(&cola_fn, netpbm_rdeg, Operacion);
+			if ((optind + 1) >= argc || is_arg(argv[optind + 1])) {
+				netpbm_exit(SUB_REQ, argv[optind]);
+			}else if( ( sscanf(argv[++optind],"%d",&i) != 1 )
+				|| i >= 180 || i <= -180 ){
+				netpbm_exit(SUB_INV, argv[optind]);
+			}else{
+				fn = netpbm_rdeg;
+				cola_encolar(&cola_fn, &fn, Operacion);
+				cola_encolar(&cola_args, &i, int);
+			}
 			
 		} else {
 			netpbm_exit(ARG_INV, argv[optind]);
@@ -187,7 +226,6 @@ int main(int argc, char *argv[]) {
 	}
 	
 	/* Aplico los cambios encolados */
-	Operacion fn;
 	while (!cola_vacia(cola_fn)) {
 		cola_desencolar(&cola_fn, &fn, Operacion);
 		fn(&img, &cola_args);

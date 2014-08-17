@@ -6,6 +6,10 @@
 
 #define HISTOGRAM_HEIGHT 120
 
+#define R_COLOR 1 << 0
+#define G_COLOR 1 << 1
+#define B_COLOR 1 << 2
+
 typedef void (*Operacion)(Netpbm *img, Cola_gen *args);
 
 void netpbm_inv			(Netpbm *img, Cola_gen *args);
