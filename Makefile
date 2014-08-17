@@ -1,16 +1,23 @@
-install:
-	gcc -Wall *.c -o netpbm.exe
+CC = gcc
+CFLAGS = -Wall
 
-test:
-	./netpbm -e "img/test.ppm" -I -s "output/Invertida.ppm"
-	./netpbm -e "img/test.ppm" -m -s "output/VolteadaV.ppm"
-	./netpbm -e "img/test.ppm" -v -s "output/VolteadaH.ppm"
-	./netpbm -e "img/test.ppm" -r i -s "output/RotadaI.ppm"
-	./netpbm -e "img/test.ppm" -r d -s "output/RotadaD.ppm"
-	./netpbm -e "img/test.ppm" -masc "img/masc.pgm" "img/super.ppm" -s "output/Mascara.ppm"
-	./netpbm -e "img/test.pgm" -I -s "output/Invertida.pgm"
-	./netpbm -e "img/test.pgm" -m -s "output/VolteadaV.pgm"
-	./netpbm -e "img/test.pgm" -v -s "output/VolteadaH.pgm"
-	./netpbm -e "img/test.pgm" -r i -s "output/RotadaI.pgm"
-	./netpbm -e "img/test.pgm" -r d -s "output/RotadaD.pgm"
-	./netpbm -e "img/test.pgm" -masc "img/masc.pgm" "img/super.ppm" -s "output/Mascara.pgm"
+all: main.o
+	$(CC) -o netpbm main.o operaciones.o netpbm.o cola_gen.o errors.o
+
+main.o: main.c operaciones.o errors.o cola_gen.o
+	$(CC) $(CFLAGS) -c -o main.o main.c
+
+operaciones.o: operaciones.c operaciones.h netpbm.o cola_gen.o errors.o
+	$(CC) $(CFLAGS) -c -o operaciones.o operaciones.c
+
+netpbm.o: netpbm.c netpbm.h errors.o
+	$(CC) $(CFLAGS) -c -o netpbm.o netpbm.c
+	
+cola_gen.o: cola_gen.c cola_gen.h
+	$(CC) $(CFLAGS) -c -o cola_gen.o cola_gen.c
+
+errors.o: errors.c errors.h
+	$(CC) $(CFLAGS) -c -o errors.o errors.c
+	
+clean:
+	rm -f *.o netpbm

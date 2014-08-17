@@ -33,4 +33,3 @@ void _cola_desencolar(Cola_gen *cola, void *dest, int size);
 void cola_destroy(Cola_gen *cola);
 
 #endif
-
