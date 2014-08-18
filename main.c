@@ -7,10 +7,14 @@
 #include "errors.h"
 #include "cola_gen.h"
 
+#define FILE_COMMENT "Made in Argentina :)"
+
 int cant_args = 15;
 char *argumentos[] = { "h", "e", "i", "m", "v", "r", "D", "d", "I", "b", "s",
 	"masc", "hist", "kern", "rdeg" };
 	
+char *comment = FILE_COMMENT;
+
 int is_arg(char *cmp_arg) {
 	int i;
 	for( i = 0; i < cant_args ; i++ ){
@@ -24,23 +28,24 @@ int is_arg(char *cmp_arg) {
 
 void usage() {
 	printf("\n"
-		" -h            muestra una ayuda con todas estas opciones.\n"
-		" -e <archivo>  nombre del archivo de entrada.\n"
-		" -s <archivo>  nombre del archivo de salida.\n"
-		" \n"
-		" -i            mostrar información de la imágen.\n"
-		" -m            voltear horizontalmente.\n"
-		" -v            voltear verticalmente.\n"
-		" -r (i|d)      rotar a izquierda o derecha respectivamente.\n"
-		" -D            duplica el tamaño.\n"
-		" -d            divide a la mitad el tamaño.\n"
-		" -I            inviertir colores.\n"
-		" -b            desenfocar"
-		" \n"
-		" -masc <mascara> <superpuesta>    aplica la mascara."
-		" -hist rgb                        genera histograma a <salida>"
-		" -kern n,n,n,n,n,n,n,n,n,p        produce convulsion 3x3"
-		" -rdeg <angulo>                   rota la imágen en grados");
+	 "      -h               muestra una ayuda con todas estas opciones.\n"
+	 "      -e <archivo>     nombre del archivo de entrada.\n"
+	 "      -s <archivo>     nombre del archivo de salida.\n"
+	 "      \n"
+	 "      -i               mostrar información de la imágen.\n"
+	 "      -m               voltear horizontalmente.\n"
+	 "      -v               voltear verticalmente.\n"
+	 "      -r (i|d)         rotar a izquierda o derecha respectivamente.\n"
+	 "      -D               duplica el tamaño.\n"
+	 "      -d               divide a la mitad el tamaño.\n"
+	 "      -I               inviertir colores.\n"
+	 "      -b               desenfocar\n"
+	 "      -c               define el comentario del archivo de salida\n"
+	 "      \n"
+	 "      -masc <mascara> <superpuesta>  aplica la mascara\n"
+	 "      -hist rgb                      genera histograma a <salida>\n"
+	 "      -kern n,n,n,n,n,n,n,n,n,p      produce convulsion 3x3\n"
+	 "      -rdeg <angulo>                 rota la imágen en grados\n");
 }
 
 Cola_gen 	cola_fn,
@@ -105,6 +110,13 @@ int main(int argc, char *argv[]) {
 			fn = netpbm_div;
 			cola_encolar(&cola_fn, &fn, Operacion);
 
+		} else if (strcmp(argv[ optind ], "-c") == 0) {
+			if ((optind + 1) >= argc || is_arg(argv[optind + 1])) {
+				netpbm_exit(SUB_REQ, argv[optind]);
+			}else{
+				optind++;
+				comment = argv[optind];
+			}
 		} else if (strcmp(argv[ optind ], "-r") == 0) {
 			if ((optind + 1) >= argc || is_arg(argv[optind + 1])) {
 				netpbm_exit(SUB_REQ, argv[optind]);

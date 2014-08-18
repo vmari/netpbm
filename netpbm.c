@@ -91,10 +91,11 @@ int netpbm_set_file(Netpbm *img, char *fileIn) {
 }
 
 int netpbm_dump_file(Netpbm *img, FILE *fp) {
+	extern char *comment;
 	if (!fp) return 0;
 
 	fprintf(fp, "%s\n", img->magic);
-	fprintf(fp, "# Hi there!\n");
+	fprintf(fp, "#%s\n", comment);
 	fprintf(fp, "%d %d\n", img->width, img->height);
 	fprintf(fp, "%d\n", img->maxval);
 
