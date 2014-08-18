@@ -36,4 +36,6 @@ void netpbm_kern		(Netpbm *img, Cola_gen *args);
 
 void netpbm_hist		(Netpbm *img, Cola_gen *args);
 
+void netpbm_crop		(Netpbm *img, Cola_gen *args);
+
 #endif

@@ -10,8 +10,8 @@
 #define FILE_COMMENT "Made in Argentina :)"
 
 int cant_args = 15;
-char *argumentos[] = { "h", "e", "i", "m", "v", "r", "D", "d", "I", "b", "s",
-	"masc", "hist", "kern", "rdeg" };
+char *argumentos[] = { "h", "e", "i", "m", "v", "r", "D", "d", "I", "b", "c",
+	"s", "masc", "hist", "kern", "rdeg", "crop" };
 	
 char *comment = FILE_COMMENT;
 
@@ -32,7 +32,7 @@ void usage() {
 	 "      -e <archivo>     nombre del archivo de entrada.\n"
 	 "      -s <archivo>     nombre del archivo de salida.\n"
 	 "      \n"
-	 "      -i               mostrar información de la imágen.\n"
+	 "      -i               mostrar información de la imágen.\n" // Muestra la info del archivo de entrada, no la img actual.
 	 "      -m               voltear horizontalmente.\n"
 	 "      -v               voltear verticalmente.\n"
 	 "      -r (i|d)         rotar a izquierda o derecha respectivamente.\n"
@@ -45,7 +45,8 @@ void usage() {
 	 "      -masc <mascara> <superpuesta>  aplica la mascara\n"
 	 "      -hist rgb                      genera histograma a <salida>\n"
 	 "      -kern n,n,n,n,n,n,n,n,n,p      produce convulsion 3x3\n"
-	 "      -rdeg <angulo>                 rota la imágen en grados\n");
+	 "      -rdeg <angulo>                 rota la imágen en grados\n"
+	 "      -crop x,y,tx,ty                corta la imágen");
 }
 
 Cola_gen 	cola_fn,
@@ -190,6 +191,15 @@ int main(int argc, char *argv[]) {
 				fn = netpbm_rdeg;
 				cola_encolar(&cola_fn, &fn, Operacion);
 				cola_encolar(&cola_args, &i, int);
+			}
+			
+		} else if (strcmp(argv[ optind ], "-crop") == 0) {
+			if ((optind + 1) >= argc || is_arg(argv[optind + 1])) {
+				netpbm_exit(SUB_REQ, argv[optind]);
+			}else{
+				fn = netpbm_crop;
+				cola_encolar(&cola_fn, &fn, Operacion);
+				cola_encolar(&cola_args, &argv[++optind], char*);
 			}
 			
 		} else {

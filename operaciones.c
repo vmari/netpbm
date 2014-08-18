@@ -428,3 +428,36 @@ void netpbm_hist(Netpbm *img , Cola_gen *args){
 	
 	netpbm_destroy(&hist);
 }
+
+void netpbm_crop(Netpbm *img , Cola_gen *args){
+	char *param;
+	cola_desencolar(args, &param, char*);
+	
+	
+	int dims[4];	
+	if( sscanf(param,"%d,%d,%d,%d", &dims[0], &dims[1], &dims[2], &dims[3]) != 4 )
+		netpbm_exit(SUB_INV, param);
+	
+	Netpbm hist;
+	strcpy(hist.magic,img->magic);
+	hist.bpp = img->bpp;
+	hist.width = abs(dims[2]-dims[0]);
+	hist.height = abs(dims[3]-dims[1]);
+	hist.maxval = img->maxval;
+	
+	long int tam = hist.width * hist.height * hist.bpp; 
+	
+	hist.data = malloc( tam );
+	
+	
+	int i,f,j,k,l;
+	for( i = dims[0], j = 0 ; i < dims[2] ; i++, j++ ){
+		for( f = dims[1], k = 0 ; f < dims[3] ; f++, k++ ){
+			for( l = 0 ; l < img->bpp ; l++ )
+				*(netpbm_get_pixel(&hist,j,k)+l) = *(netpbm_get_pixel(img,i,f)+l);
+		}
+	}
+	
+	netpbm_copy(img, &hist);	
+	netpbm_destroy(&hist);
+}
