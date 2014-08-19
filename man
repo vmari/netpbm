@@ -1,0 +1,76 @@
+NETPBM(1)                          NETPBM(1)
+
+NOMBRE
+    netpbm - manipula imágenes formato ppm y pgm 
+
+SINOPSIS
+    netpbm -e <entrada> -s <salida> [-h] [-i] [-m] [-v]
+        [-r i|d] [-D] [-d] [-I] [-b] [-c comentario]
+        [-masc <mascara> <superpuesta>] [-hist r?g?b?]
+        [-kern n,n,n,n,n,n,n,n,n,p] [-rdeg angle] 
+        [-crop x,y,tx,ty]
+
+DESCRIPCIÓN
+       netpbm es un conjunto de herramientas para modificar
+       y crear imágenes P5 y P6 del formato netpbm.
+
+OPCIONES
+        -h
+         muestra una ayuda con todas estas opciones.
+        
+        -e <archivo>
+         define el nombre del archivo de entrada.
+         
+        -s <archivo>
+         nombre del archivo de salida.
+         
+        -i
+         mostrar información de la imágen.
+         
+        -m
+         voltear horizontalmente.
+         
+        -v
+         voltear verticalmente.
+         
+        -r (i|d)
+         rotar a izquierda o derecha respectivamente.
+         
+        -D
+         duplica el tamaño.
+        
+        -d
+         divide a la mitad el tamaño.
+        
+        -I
+         inviertir colores.
+        
+        -b
+         desenfocar.
+         
+        -c
+         define el comentario del archivo de salida.
+        
+        -masc <mascara> <superpuesta>
+         aplica la mascara.
+         
+        -hist rgb
+         genera histograma a <salida>. puede ser canalizando
+         indicando los canales deseados en caso de ser formato
+         P6
+         
+        -kern n,n,n,n,n,n,n,n,n,p
+         produce convulsion 3x3. 'p' hace referencia a
+         colocar el promedio. debe ser 1 ó 0
+         
+        -rdeg <angulo>
+         rota la imágen en grados. angulo puede ser de -180 a 180
+        
+        -crop x,y,tx,ty
+         corta la imágen, desde P(x,y), hasta P(tx,ty);
+
+BUGS
+       El rotar tiene puntitos. jaja. Y no anda con 40°.
+
+AUTHOR
+         valentinmari[at]hotmail.com
