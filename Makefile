@@ -1,8 +1,9 @@
 CC = gcc
 CFLAGS = -Wall
 
+#Linkeo con -lm ya que math.h lo requiere en man
 all: main.o
-	$(CC) -o netpbm main.o operaciones.o netpbm.o cola_gen.o errors.o
+	$(CC) -o netpbm main.o operaciones.o netpbm.o cola_gen.o errors.o -lm
 
 main.o: main.c operaciones.o errors.o cola_gen.o
 	$(CC) $(CFLAGS) -c -o main.o main.c
@@ -20,4 +21,4 @@ errors.o: errors.c errors.h
 	$(CC) $(CFLAGS) -c -o errors.o errors.c
 	
 clean:
-	rm -f *.o netpbm
+	$(RM) *.o netpbm

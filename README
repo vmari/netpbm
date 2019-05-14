@@ -13,6 +13,7 @@ SINOPSIS
 DESCRIPCIÓN
        netpbm es un conjunto de herramientas para modificar
        y crear imágenes P5 y P6 del formato netpbm.
+	   forma de compilación: make all.
 
 OPCIONES
         -h
